@@ -46,7 +46,7 @@ release:
 			'BEGIN{n=0} /sha256/{n++;if(n==1)sub(/sha256 "[^"]*"/,"sha256 \""arm"\"");if(n==2)sub(/sha256 "[^"]*"/,"sha256 \""x86"\"");if(n==3)sub(/sha256 "[^"]*"/,"sha256 \""linux"\"")} {print}' \
 			$(HOMEBREW_TAP)/Formula/sncf.rb > $(HOMEBREW_TAP)/Formula/sncf.rb.tmp && \
 		mv $(HOMEBREW_TAP)/Formula/sncf.rb.tmp $(HOMEBREW_TAP)/Formula/sncf.rb
-	@cd $(HOMEBREW_TAP) && git add -A && git commit -m "sncf $(VERSION)" && git push
+	@cd $(HOMEBREW_TAP) && git add -A && git commit -m "sncf $(VERSION)" && git pull --rebase && git push
 	@echo ""
 	@echo "=== Release v$(VERSION) complete! ==="
 	@echo "  - Tagged and pushed sncf"
