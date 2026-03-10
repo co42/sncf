@@ -5,6 +5,10 @@ edition = "2024"
 description = "SNCF train schedule CLI"
 license = "MIT"
 repository = "https://github.com/co42/sncf"
+authors = ["Corentin Regal"]
+readme = "README.md"
+keywords = ["sncf", "train", "cli", "navitia"]
+categories = ["command-line-utilities"]
 
 [[bin]]
 name = "sncf"
