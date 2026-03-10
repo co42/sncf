@@ -1,4 +1,4 @@
-use crate::client::{calculate_delay_minutes, format_time, Journey, Section, SncfClient};
+use crate::client::{Journey, Section, SncfClient, calculate_delay_minutes, format_time};
 use crate::output::{HumanReadable, Output};
 use anyhow::Result;
 use chrono::{Local, NaiveTime};
@@ -89,10 +89,7 @@ fn journey_to_result(journey: Journey) -> JourneyResult {
         .unwrap_or_default();
 
     // Max delay across all sections
-    let delay_minutes = pt_sections
-        .iter()
-        .filter_map(|s| section_delay(s))
-        .max();
+    let delay_minutes = pt_sections.iter().filter_map(|s| section_delay(s)).max();
 
     let duration_minutes = journey.duration.unwrap_or(0) / 60;
 
