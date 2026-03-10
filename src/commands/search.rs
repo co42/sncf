@@ -1,3 +1,4 @@
+use crate::aliases;
 use crate::client::{Place, SncfClient};
 use crate::output::{HumanReadable, Output};
 use anyhow::Result;
@@ -37,7 +38,11 @@ impl From<Place> for StationResult {
 }
 
 pub async fn run(client: &SncfClient, output: &Output, query: &str, limit: u32) -> Result<()> {
-    let places = client.search_places(query, limit).await?;
+    // Resolve alias if present
+    let aliases = aliases::load_aliases();
+    let resolved_query = aliases.get(query).map(|s| s.as_str()).unwrap_or(query);
+
+    let places = client.search_places(resolved_query, limit).await?;
     let results: Vec<StationResult> = places.into_iter().map(StationResult::from).collect();
     output.print_list(&results);
     Ok(())

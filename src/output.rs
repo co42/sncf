@@ -1,3 +1,4 @@
+use crate::error::Error;
 use colored::Colorize;
 use serde::Serialize;
 use std::io::IsTerminal;
@@ -5,15 +6,17 @@ use std::io::IsTerminal;
 #[derive(Debug, Clone)]
 pub struct Output {
     json: bool,
+    compact: bool,
     quiet: bool,
     fields: Vec<String>,
 }
 
 impl Output {
-    pub fn new(json: Option<bool>, quiet: bool, fields: Vec<String>) -> Self {
+    pub fn new(json: Option<bool>, compact: bool, quiet: bool, fields: Vec<String>) -> Self {
         let json = json.unwrap_or_else(|| !std::io::stdout().is_terminal());
         Self {
             json,
+            compact,
             quiet,
             fields,
         }
@@ -40,7 +43,12 @@ impl Output {
     fn print_json<T: Serialize>(&self, data: &T) {
         let value = serde_json::to_value(data).unwrap();
         let filtered = self.filter_fields(value);
-        println!("{}", serde_json::to_string_pretty(&filtered).unwrap());
+        let output = if self.compact {
+            serde_json::to_string(&filtered).unwrap()
+        } else {
+            serde_json::to_string_pretty(&filtered).unwrap()
+        };
+        println!("{output}");
     }
 
     fn filter_fields(&self, value: serde_json::Value) -> serde_json::Value {
@@ -63,7 +71,24 @@ impl Output {
     }
 
     pub fn error(&self, msg: &str) {
-        eprintln!("{} {}", "✗".red(), msg);
+        eprintln!("{} {}", "\u{2717}".red(), msg);
+    }
+
+    pub fn error_structured(&self, err: &Error) {
+        if self.json {
+            let obj = serde_json::json!({
+                "error": err.to_string(),
+                "code": err.code(),
+            });
+            let output = if self.compact {
+                serde_json::to_string(&obj).unwrap()
+            } else {
+                serde_json::to_string_pretty(&obj).unwrap()
+            };
+            eprintln!("{output}");
+        } else {
+            self.error(&err.to_string());
+        }
     }
 
     pub fn is_json(&self) -> bool {
