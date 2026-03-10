@@ -78,9 +78,9 @@ sncf next home work
 Output format is auto-detected from TTY. Override with:
 
 ```bash
-sncf next "Lyon" "Paris" --json          # Force JSON
+sncf next "Lyon" "Paris" --json          # Force JSON (compact by default)
 sncf next "Lyon" "Paris" --no-json       # Force human-readable
-sncf next "Lyon" "Paris" --json --compact # Compact JSON (no pretty-printing)
+sncf next "Lyon" "Paris" --json --pretty # Pretty-print JSON
 sncf next "Lyon" "Paris" --json --fields departure,arrival,train_type
 sncf next "Lyon" "Paris" -q              # Quiet (suppress output)
 ```

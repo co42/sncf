@@ -6,17 +6,17 @@ use std::io::IsTerminal;
 #[derive(Debug, Clone)]
 pub struct Output {
     json: bool,
-    compact: bool,
+    pretty: bool,
     quiet: bool,
     fields: Vec<String>,
 }
 
 impl Output {
-    pub fn new(json: Option<bool>, compact: bool, quiet: bool, fields: Vec<String>) -> Self {
+    pub fn new(json: Option<bool>, pretty: bool, quiet: bool, fields: Vec<String>) -> Self {
         let json = json.unwrap_or_else(|| !std::io::stdout().is_terminal());
         Self {
             json,
-            compact,
+            pretty,
             quiet,
             fields,
         }
@@ -43,10 +43,10 @@ impl Output {
     fn print_json<T: Serialize>(&self, data: &T) {
         let value = serde_json::to_value(data).unwrap();
         let filtered = self.filter_fields(value);
-        let output = if self.compact {
-            serde_json::to_string(&filtered).unwrap()
-        } else {
+        let output = if self.pretty {
             serde_json::to_string_pretty(&filtered).unwrap()
+        } else {
+            serde_json::to_string(&filtered).unwrap()
         };
         println!("{output}");
     }
@@ -80,10 +80,10 @@ impl Output {
                 "error": err.to_string(),
                 "code": err.code(),
             });
-            let output = if self.compact {
-                serde_json::to_string(&obj).unwrap()
-            } else {
+            let output = if self.pretty {
                 serde_json::to_string_pretty(&obj).unwrap()
+            } else {
+                serde_json::to_string(&obj).unwrap()
             };
             eprintln!("{output}");
         } else {

@@ -15,9 +15,9 @@ struct Cli {
     #[arg(long, global = true)]
     no_json: bool,
 
-    /// Compact JSON output (no pretty-printing)
+    /// Pretty-print JSON output
     #[arg(long, global = true)]
-    compact: bool,
+    pretty: bool,
 
     /// Filter output fields (comma-separated, JSON mode only)
     #[arg(long, global = true, value_delimiter = ',')]
@@ -40,7 +40,7 @@ impl Cli {
         } else {
             None
         };
-        Output::new(json, self.compact, self.quiet, self.fields.clone())
+        Output::new(json, self.pretty, self.quiet, self.fields.clone())
     }
 }
 
