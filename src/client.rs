@@ -358,11 +358,29 @@ impl SncfClient {
             .map(|s| s.as_str())
             .unwrap_or(name_or_id);
 
-        let places = self.search_places(query, 1).await?;
-        places
-            .first()
-            .map(|p| p.id.clone())
-            .ok_or_else(|| anyhow::anyhow!("No station found for: {}", name_or_id))
+        let places = self.search_places(query, 10).await?;
+        if places.is_empty() {
+            return Err(anyhow::anyhow!("No station found for: {}", name_or_id));
+        }
+
+        // Prefer a result whose city (in parentheses in label) matches the query,
+        // so "lyon" prefers "Lyon Part Dieu (Lyon)" over "Paris - Gare de Lyon (Paris)".
+        let q = query.to_lowercase();
+        let best = places
+            .iter()
+            .find(|p| {
+                let label = p.stop_area.as_ref().map(|sa| &sa.label).unwrap_or(&p.name);
+                if let Some(start) = label.rfind('(') {
+                    let city = label[start + 1..].trim_end_matches(')').to_lowercase();
+                    city == q || city.starts_with(&q)
+                } else {
+                    false
+                }
+            })
+            .or_else(|| places.first())
+            .unwrap();
+
+        Ok(best.id.clone())
     }
 }
 
